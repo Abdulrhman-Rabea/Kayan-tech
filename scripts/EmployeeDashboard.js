@@ -430,7 +430,7 @@ async function checkSession() {
         currentUserId = session.$id;
         updateDashboardUserId();
     } catch (err) {
-        window.location.href = '/pages/login.html';
+        window.location.href = '/Pages/login.html';
     }
 }
 // Call checkSession when the script loads
