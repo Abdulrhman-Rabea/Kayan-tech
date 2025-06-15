@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await account.createEmailSession(email, password);
             showErrorMessage('welcome');
 
-            window.location.href = "/Pages/EmployeeDashboard.html"
+            window.location.href = "./pages/EmployeeDashboard.html"
         } catch (err) {
             showErrorMessage("invalid credential")
         }
