@@ -499,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
 signoutBTN.addEventListener('click', async function signout() {
     try {
         await account.deleteSession('current');
-        window.location.href = '/Pages/login.html';
+        window.location.href = '/pages/login.html';
     } catch (error) {
         console.error('Error signing out:', error);
         showToast("Error signing out. Please try again.", "error");
