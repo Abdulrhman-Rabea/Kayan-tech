@@ -3,15 +3,13 @@
 
     <script type="module">
         import { account } from '../scripts/appwrite-config.js';
-
         async function checkSession() {
             try {
                 await account.get();
             } catch (err) {
-                window.location.href = './pages/login.html';
+                window.location.href = './login.html';
             }
         }
-
         checkSession();
     </script>
 
