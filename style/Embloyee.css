@@ -1,0 +1,184 @@
+ /* Custom styles for Material Design look and feel */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    overflow: hidden;
+    /* Prevent body scroll, main content handles scroll */
+}
+/* Dark mode transitions */
+html.dark {
+    background-color: #1a202c;
+    /* Dark background */
+    color: #e2e8f0;
+    /* Light text */
+}
+/* General transitions for UI elements */
+.transition-colors {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 300ms;
+}
+.transition-transform {
+    transition-property: transform;
+    transition-duration: 300ms;
+}
+.transition-opacity {
+    transition-property: opacity;
+    transition-duration: 300ms;
+}
+/* Modal animation */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+.modal-overlay.open {
+    opacity: 1;
+}
+.modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+.modal-overlay.open .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+/* Floating action button */
+.fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: #2196f3;
+    /* Blue 500 */
+    color: white;
+    border-radius: 9999px;
+    /* Full rounded */
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    /* Material shadow */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    z-index: 20;
+}
+.fab:hover {
+    background-color: #1976d2;
+    /* Blue 700 */
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+/* Hide scrollbar for a cleaner look, but allow scrolling */
+.overflow-auto::-webkit-scrollbar {
+    display: none;
+}
+.overflow-auto {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    /* Fallback for unsupported browsers */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    /* Firefox */
+}
+/* Drag and Drop Area */
+.drag-area {
+    border: 2px dashed #a0aec0;
+    /* gray-400 */
+    background-color: #f7fafc;
+    /* gray-50 */
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 0.5rem;
+    /* rounded-md */
+    transition: background-color 0.3s, border-color 0.3s;
+}
+.drag-area.hover {
+    background-color: #e2e8f0;
+    /* gray-200 */
+    border-color: #4299e1;
+    /* blue-500 */
+}
+/* Dark mode specific for drag area */
+html.dark .drag-area {
+    background-color: #2d3748;
+    /* gray-800 */
+    border-color: #4a5568;
+    /* gray-600 */
+}
+html.dark .drag-area.hover {
+    background-color: #4a5568;
+    /* gray-600 */
+    border-color: #63b3ed;
+    /* blue-300 */
+}
+/* Toast styles */
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast-success {
+    background-color: #4CAF50;
+}
+/* Green */
+.toast-error {
+    background-color: #F44336;
+}
+/* Red */
+.toast-info {
+    background-color: #2196F3;
+}
+/* Blue */
+/* Icons for Material Design feel */
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    /* full rounded */
+    transition: background-color 0.2s;
+}
+.icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    /* Light hover */
+}
+html.dark .icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    /* Dark hover */
+}
+.sticky{
+    background-position: inherit;
+}
+/* Add your styles here */
+.sticky-top {
+    position: sticky;
+    top: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+}

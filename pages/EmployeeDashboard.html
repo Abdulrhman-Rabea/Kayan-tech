@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <script type="module">
+        import { account } from '../scripts/appwrite-config.js';
+
+        async function checkSession() {
+            try {
+                await account.get();
+            } catch (err) {
+                window.location.href = '/Pages/login.html';
+            }
+        }
+
+        checkSession();
+    </script>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Employee Dashboard</title>
+        <!-- Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="../style/Embloyee.css">
+    </head>
+
+    <body class="bg-#1d1d3a-100 text-gray-900 transition-colors duration-300">
+        <div class="flex h-screen">
+            <!-- Sidebar -->
+            <aside id="sidebar"
+                class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-white flex flex-col shadow-lg z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 rounded-r-lg">
+                <div
+                    class="p-6 text-2xl font-bold text-center border-b border-gray-700">
+                    Employee Dashboard
+                </div>
+                <nav class="flex-1 p-4">
+                    <ul>
+                        <li class="mb-2">
+                            <button onclick="showPage('dashboard')"
+                                class="w-full text-left p-3 rounded-md flex items-center space-x-3 transition-colors duration-200 bg-blue-600 shadow-md">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-layout-dashboard">
+                                    <rect width="7" height="9" x="3" y="3"
+                                        rx="1" />
+                                    <rect width="7" height="5" x="14" y="3"
+                                        rx="1" />
+                                    <rect width="7" height="9" x="14" y="12"
+                                        rx="1" />
+                                    <rect width="7" height="5" x="3" y="16"
+                                        rx="1" />
+                                </svg>
+                                <span>Dashboard Overview</span>
+                            </button>
+                        </li>
+                        <li class="mb-2">
+                            <button onclick="showPage('tasks')"
+                                class="w-full text-left p-3 rounded-md flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-700">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-list-todo">
+                                    <rect x="3" y="5" width="6" height="6"
+                                        rx="1" />
+                                    <path d="m3 17h.01" />
+                                    <path d="M7 17h.01" />
+                                    <path d="M11 17h.01" />
+                                    <path d="M15 17h.01" />
+                                    <path d="M19 17h.01" />
+                                    <path d="M11 5h9" />
+                                    <path d="M11 9h9" />
+                                </svg>
+                                <span>Tasks</span>
+                            </button>
+                        </li>
+                        <li class="mb-2">
+                            <button onclick="showPage('agents')"
+                                class="w-full text-left p-3 rounded-md flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-700">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-users">
+                                    <path
+                                        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                                <span>Agents Data</span>
+                            </button>
+                        </li>
+                        <li class="mb-2">
+                            <button onclick="showPage('settings')"
+                                class="w-full text-left p-3 rounded-md flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-700">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-settings">
+                                    <path
+                                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.09.1a2 2 0 0 1 0 2.73l-.09.1a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.09-.1a2 2 0 0 1 0-2.73l.09-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                <span>Settings</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="p-4 border-t border-gray-700">
+                    <div class="text-sm text-gray-400 mb-2 break-words">
+                        User ID: <span class="font-mono text-gray-300"
+                            id="user-id-display">N/A</span>
+                    </div>
+                    <button onclick=" signout()"
+                        class=" w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-md shadow-md transition-colors duration-200 signoutBTN">
+                        Sign Out
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col md:ml-64">
+                <!-- Top Navbar for desktop and mobile -->
+                <header
+                    class="bg-white dark:bg-gray-800 shadow-md p-4 flex items-center justify-between z-30 md:static fixed top-0 left-0 right-0 w-full md:w-auto">
+                    <div class="flex items-center">
+                        <button title="menu-toggle" id="menu-toggle"
+                            class="md:hidden text-gray-600 dark:text-gray-300 mr-4 icon-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-menu">
+                                <line x1="4" x2="20" y1="12" y2="12" />
+                                <line x1="4" x2="20" y1="6" y2="6" />
+                                <line x1="4" x2="20" y1="18" y2="18" />
+                            </svg>
+                        </button>
+                        <div
+                            class="text-xl font-bold text-gray-800 dark:text-white">
+                            Dashboard</div>
+                    </div>
+                    <!-- Dark mode toggle re-added -->
+                    <div class="flex items-center space-x-4">
+                        <button title="dark-mode-toggle" id="dark-mode-toggle"
+                            class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors icon-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-sun">
+                                <circle cx="12" cy="12" r="8" />
+                                <line x1="12" x2="12" y1="1" y2="3" />
+                                <line x1="12" x2="12" y1="21" y2="23" />
+                                <line x1="4.22" x2="5.64" y1="4.22" y2="5.64" />
+                                <line x1="18.36" x2="19.78" y1="18.36"
+                                    y2="19.78" />
+                                <line x1="1" x2="3" y1="12" y2="12" />
+                                <line x1="21" x2="23" y1="12" y2="12" />
+                                <line x1="4.22" x2="5.64" y1="19.78"
+                                    y2="18.36" />
+                                <line x1="18.36" x2="19.78" y1="5.64"
+                                    y2="4.22" />
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Main Content Sections -->
+                <main class="flex-1 p-8 overflow-auto pt-20 md:pt-8">
+                    <!-- Adjust padding for fixed header -->
+                    <!-- Dashboard Overview -->
+                    <section id="dashboard" class="page-content active">
+                        <div
+                            class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md transition-colors duration-300">
+                            <h1
+                                class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+                                Welcome to Your Dashboard!</h1>
+                            <p class="text-gray-600 dark:text-gray-300 mb-8">
+                                This is your central hub for managing tasks,
+                                viewing agent information, and updating your
+                                personal settings.
+                            </p>
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Quick Access Cards -->
+                                <button onclick="showPage('tasks')"
+                                    class="group bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col items-center justify-center text-center transform hover:-translate-y-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        width="40" height="40"
+                                        viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="lucide lucide-list-todo text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200 mb-3">
+                                        <rect x="3" y="5" width="6" height="6"
+                                            rx="1" />
+                                        <path d="m3 17h.01" />
+                                        <path d="M7 17h.01" />
+                                        <path d="M11 17h.01" />
+                                        <path d="M15 17h.01" />
+                                        <path d="M19 17h.01" />
+                                        <path d="M11 5h9" />
+                                        <path d="M11 9h9" />
+                                    </svg>
+                                    <h2
+                                        class="text-xl font-semibold text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200 mb-2">
+                                        Manage Your Tasks</h2>
+                                    <p
+                                        class="text-gray-700 dark:text-gray-300 text-sm">
+                                        View, add, and update your daily tasks
+                                        and to-do items.</p>
+                                </button>
+
+                                <button onclick="showPage('agents')"
+                                    class="group bg-green-50 dark:bg-green-900 dark:bg-opacity-30 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col items-center justify-center text-center transform hover:-translate-y-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        width="40" height="40"
+                                        viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="lucide lucide-users text-green-700 dark:text-green-300 group-hover:text-green-800 dark:group-hover:text-green-200 mb-3">
+                                        <path
+                                            d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>
+                                    <h2
+                                        class="text-xl font-semibold text-green-700 dark:text-green-300 group-hover:text-green-800 dark:group-hover:text-green-200 mb-2">
+                                        View Agents Data</h2>
+                                    <p
+                                        class="text-gray-700 dark:text-gray-300 text-sm">
+                                        Access and search information about your
+                                        team members.</p>
+                                </button>
+
+                                <!-- Beautified Notifications Section -->
+                                <div
+                                    class="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-30 p-6 rounded-lg shadow-sm flex flex-col items-center justify-center text-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        width="40" height="40"
+                                        viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="lucide lucide-bell text-yellow-700 dark:text-yellow-300 mb-3">
+                                        <path
+                                            d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                        <path
+                                            d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                                    </svg>
+                                    <h2
+                                        class="text-xl font-semibold text-yellow-700 dark:text-yellow-300 mb-2">
+                                        Important Notifications</h2>
+                                    <p
+                                        class="text-gray-700 dark:text-gray-300 text-sm">
+                                        Stay updated with important alerts and
+                                        announcements.</p>
+                                    <div class="mt-4 w-full">
+                                        <div
+                                            class="bg-yellow-100 dark:bg-yellow-800 dark:bg-opacity-50 p-3 rounded-md text-yellow-800 dark:text-yellow-100 text-sm">
+                                            No new notifications at this time.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- User Information Card -->
+                                <div
+                                    class="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-30 p-6 rounded-lg shadow-sm col-span-full md:col-span-1">
+                                    <h2
+                                        class="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-2">
+                                        Your Dashboard Info</h2>
+                                    <p
+                                        class="text-gray-700 dark:text-gray-300 mb-2">
+                                        You are logged in with the ID:</p>
+                                    <p
+                                        class="text-gray-800 dark:text-white font-mono break-words bg-gray-100 dark:bg-gray-700 p-2 rounded-md inline-block text-sm">
+                                        <span id="dashboard-user-id">N/A</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tasks Section -->
+                    <section id="tasks" class="page-content hidden relative">
+                        <div
+                            class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md transition-colors duration-300">
+                            <h1
+                                class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+                                Your Tasks</h1>
+                            <div id="tasks-list"
+                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Task cards will be rendered here by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Floating Action Button for Add Task -->
+                        <button title="add-task-fab" id="add-task-fab"
+                            class="fab">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32"
+                                height="32" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-plus">
+                                <path d="M12 5v14" />
+                                <path d="M5 12h14" />
+                            </svg>
+                        </button>
+                    </section>
+
+                    <!-- Agents Data Section -->
+                    <section id="agents" class="page-content hidden">
+                        <div
+                            class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md transition-colors duration-300">
+                            <h1
+                                class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+                                Agents Data</h1>
+
+                            <div class="mb-6 sticky-top pt-2 pb-4">
+                                <div class="relative">
+                                    <input type="text" id="agent-search-input"
+                                        placeholder="Search agents..."
+                                        class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white shadow-sm transition-colors duration-300">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            width="20" height="20"
+                                            viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            class="lucide lucide-search text-gray-400 dark:text-gray-500">
+                                            <circle cx="11" cy="11" r="8" />
+                                            <path d="m21 21-4.3-4.3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="agents-loading"
+                                class="text-center text-gray-600 dark:text-gray-300 hidden mt-8">
+                                Loading agents data...</div>
+                            <p id="agents-error"
+                                class="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 p-4 rounded-md hidden mt-8">
+                                Failed to load agents data.</p>
+                            <div id="agents-list"
+                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <!-- Agent cards will be rendered here by JavaScript -->
+                            </div>
+                            <button id="show-more-agents"
+                                class="mt-6 px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 hidden">Show
+                                More</button>
+                            <p id="no-agents-found"
+                                class="text-gray-600 dark:text-gray-300 text-center mt-8 hidden">
+                                No agents found matching your search.</p>
+                        </div>
+                    </section>
+
+                    <!-- Settings Section -->
+                    <section id="settings" class="page-content hidden">
+                        <div
+                            class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md transition-colors duration-300">
+                            <h1
+                                class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+                                Settings</h1>
+
+                            <!-- Password Update Section -->
+                            <div
+                                class="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors duration-300">
+                                <h2
+                                    class="text-2xl font-semibold text-gray-700 dark:text-white mb-4">
+                                    Change Password</h2>
+                                <form id="password-change-form">
+                                    <div class="mb-4">
+                                        <label for="oldPassword"
+                                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                                            Old Password:
+                                        </label>
+                                        <div class="relative">
+                                            <input type="password"
+                                                id="oldPassword"
+                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white pr-10"
+                                                required>
+                                            <button title="oldPassword"
+                                                type="button"
+                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                                                onclick="togglePasswordVisibility('oldPassword')">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    width="20" height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    class="lucide lucide-eye"
+                                                    id="oldPassword-toggle-icon">
+                                                    <path
+                                                        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                    <circle cx="12" cy="12"
+                                                        r="3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p id="oldPassword-error"
+                                            class="text-red-500 text-xs mt-1 hidden">
+                                            Incorrect old password.</p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="newPassword"
+                                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                                            New Password:
+                                        </label>
+                                        <div class="relative">
+                                            <input type="password"
+                                                id="newPassword"
+                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white pr-10"
+                                                required>
+                                            <button title="newPassword"
+                                                type="button"
+                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                                                onclick="togglePasswordVisibility('newPassword')">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    width="20" height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    class="lucide lucide-eye"
+                                                    id="newPassword-toggle-icon">
+                                                    <path
+                                                        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                    <circle cx="12" cy="12"
+                                                        r="3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p id="newPassword-error"
+                                            class="text-red-500 text-xs mt-1 hidden">
+                                            Password must be at least 8
+                                            characters.</p>
+                                    </div>
+                                    <div class="mb-6">
+                                        <label for="confirmNewPassword"
+                                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                                            Confirm New Password:
+                                        </label>
+                                        <div class="relative">
+                                            <input type="password"
+                                                id="confirmNewPassword"
+                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white pr-10"
+                                                required>
+                                            <button title="confirmNewPassword"
+                                                type="button"
+                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                                                onclick="togglePasswordVisibility('confirmNewPassword')">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    width="20" height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    class="lucide lucide-eye"
+                                                    id="confirmNewPassword-toggle-icon">
+                                                    <path
+                                                        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                    <circle cx="12" cy="12"
+                                                        r="3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p id="confirmNewPassword-error"
+                                            class="text-red-500 text-xs mt-1 hidden">
+                                            Passwords do not match.</p>
+                                    </div>
+                                    <button type="submit" id="save-password-btn"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-md shadow-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled>
+                                        Save Password
+                                    </button>
+                                    <p
+                                        class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                        Note: For this demo, the old password
+                                        check is a mock.
+                                    </p>
+                                </form>
+                            </div>
+
+                            <!-- Profile Picture Section -->
+                            <div
+                                class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors duration-300">
+                                <h2
+                                    class="text-2xl font-semibold text-gray-700 dark:text-white mb-4">
+                                    Upload Profile Picture</h2>
+                                <div class="flex flex-col items-center mb-6">
+                                    <img id="profile-pic-preview"
+                                        src="https://placehold.co/150x150/cccccc/333333?text=Profile"
+                                        alt="Profile Preview"
+                                        class="w-32 h-32 rounded-full object-cover border-4 border-blue-400 dark:border-blue-600 shadow-md mb-4">
+                                    <div id="drag-drop-area"
+                                        class="drag-area w-full p-6 cursor-pointer border-dashed border-2 border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-md transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            width="32" height="32"
+                                            viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            class="lucide lucide-upload">
+                                            <path
+                                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="17 8 12 3 7 8" />
+                                            <line x1="12" x2="12" y1="3"
+                                                y2="15" />
+                                        </svg>
+                                        <p class="mt-2">Drag & Drop your image
+                                            here or <span
+                                                class="text-blue-500 dark:text-blue-400 font-semibold">click
+                                                to upload</span></p>
+                                        <input title="profile-pic-upload"
+                                            type="file" id="profile-pic-upload"
+                                            accept=".jpg, .jpeg, .png"
+                                            class="hidden">
+                                    </div>
+                                    <p id="file-error"
+                                        class="text-red-500 text-xs mt-2 hidden">
+                                        Only .jpg, .jpeg, .png files are
+                                        allowed.</p>
+                                </div>
+                                <button id="save-profile-pic-btn"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-md shadow-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                    Save Profile Picture
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <!-- Task Edit/Add Modal -->
+        <div id="task-modal-overlay"
+            class="modal-overlay fixed inset-0 z-40 hidden">
+            <div
+                class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-auto p-6 transition-colors duration-300">
+                <div
+                    class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-3 mb-4">
+                    <h2 id="task-modal-title"
+                        class="text-xl font-semibold text-gray-800 dark:text-white">
+                        Add New Task</h2>
+                    <button title="closeTaskModal" onclick="closeTaskModal()"
+                        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors icon-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-x">
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="task-form">
+                    <input type="hidden" id="task-id">
+                    <div class="mb-4">
+                        <label for="task-title"
+                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Task
+                            Title:</label>
+                        <input type="text" id="task-title"
+                            class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+                            required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="task-description"
+                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Description:</label>
+                        <textarea id="task-description" rows="3"
+                            class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="task-due-date"
+                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Due
+                            Date:</label>
+                        <input type="date" id="task-due-date"
+                            class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white">
+                    </div>
+                    <div class="mb-6">
+                        <label for="task-status"
+                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Status:</label>
+                        <select id="task-status"
+                            class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white">
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeTaskModal()"
+                            class="px-5 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">Cancel</button>
+                        <button type="submit"
+                            class="px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-colors duration-200">Save
+                            Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="module" src="../scripts/EmployeeDashboard.js"></script>
+    </body>
+
+</html>
