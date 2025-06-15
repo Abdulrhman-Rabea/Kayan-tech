@@ -6,7 +6,7 @@
         async function checkSession() {
             try {
                 await account.get();
-                window.location.href = '/Pages/EmployeeDashboard.html';
+                window.location.href = './EmployeeDashboard.html';
             } catch (error) {
                 console.error('Error checking session:', error);
             }
