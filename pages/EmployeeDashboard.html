@@ -20,6 +20,9 @@
         <!-- Tailwind CSS CDN -->
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="../style/Embloyee.css">
+        <link rel="shortcut icon"
+            href="../assets/favicon/Gemini_Generated_Image_fiboxzfiboxzfibo.jpeg"
+            type="image/x-icon">
     </head>
 
     <body class="bg-#1d1d3a-100 text-gray-900 transition-colors duration-300">
@@ -95,19 +98,17 @@
                             </button>
                         </li>
                         <li class="mb-2">
-                            <button onclick="showPage('settings')"
+                            <button onclick="showPage('actions')"
                                 class="w-full text-left p-3 rounded-md flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-700">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    class="lucide lucide-settings">
-                                    <path
-                                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.09.1a2 2 0 0 1 0 2.73l-.09.1a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.09-.1a2 2 0 0 1 0-2.73l.09-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                                    <circle cx="12" cy="12" r="3" />
+                                    class="lucide lucide-activity">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                                 </svg>
-                                <span>Settings</span>
+                                <span>Actions</span>
                             </button>
                         </li>
                     </ul>
@@ -325,8 +326,9 @@
                                 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
                                 Agents Data</h1>
 
-                            <div class="mb-6 sticky-top pt-2 pb-4">
-                                <div class="relative">
+                            <div
+                                class="mb-6 flex flex-col md:flex-row md:items-center md:space-x-4">
+                                <div class="relative flex-1">
                                     <input type="text" id="agent-search-input"
                                         placeholder="Search agents..."
                                         class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white shadow-sm transition-colors duration-300">
@@ -345,210 +347,95 @@
                                         </svg>
                                     </div>
                                 </div>
+                                <div class="mt-4 md:mt-0">
+                                    <select id="agent-search-type"
+                                        class="w-full md:w-auto p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white">
+                                        <option value="name">Name</option>
+                                        <option value="phone">Phone Number
+                                        </option>
+                                        <option value="action_status">Action
+                                            Status</option>
+                                        <option value="department">Department
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div id="agents-loading"
                                 class="text-center text-gray-600 dark:text-gray-300 hidden mt-8">
-                                Loading agents data...</div>
+                                Loading agents data...
+                            </div>
                             <p id="agents-error"
                                 class="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 p-4 rounded-md hidden mt-8">
-                                Failed to load agents data.</p>
-                            <div id="agents-list"
-                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                <!-- Agent cards will be rendered here by JavaScript -->
-                            </div>
-                            <button id="show-more-agents"
-                                class="mt-6 px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 hidden">Show
-                                More</button>
+                                Failed to load agents data.
+                            </p>
                             <p id="no-agents-found"
                                 class="text-gray-600 dark:text-gray-300 text-center mt-8 hidden">
-                                No agents found matching your search.</p>
-                        </div>
-                    </section>
+                                No agents found matching your search.
+                            </p>
 
-                    <!-- Settings Section -->
-                    <section id="settings" class="page-content hidden">
-                        <div
-                            class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md transition-colors duration-300">
-                            <h1
-                                class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
-                                Settings</h1>
-
-                            <!-- Password Update Section -->
                             <div
-                                class="mb-8 p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors duration-300">
-                                <h2
-                                    class="text-2xl font-semibold text-gray-700 dark:text-white mb-4">
-                                    Change Password</h2>
-                                <form id="password-change-form">
-                                    <div class="mb-4">
-                                        <label for="oldPassword"
-                                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-                                            Old Password:
-                                        </label>
-                                        <div class="relative">
-                                            <input type="password"
-                                                id="oldPassword"
-                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white pr-10"
-                                                required>
-                                            <button title="oldPassword"
-                                                type="button"
-                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
-                                                onclick="togglePasswordVisibility('oldPassword')">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    width="20" height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    stroke-width="2"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    class="lucide lucide-eye"
-                                                    id="oldPassword-toggle-icon">
-                                                    <path
-                                                        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                    <circle cx="12" cy="12"
-                                                        r="3" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <p id="oldPassword-error"
-                                            class="text-red-500 text-xs mt-1 hidden">
-                                            Incorrect old password.</p>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label for="newPassword"
-                                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-                                            New Password:
-                                        </label>
-                                        <div class="relative">
-                                            <input type="password"
-                                                id="newPassword"
-                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white pr-10"
-                                                required>
-                                            <button title="newPassword"
-                                                type="button"
-                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
-                                                onclick="togglePasswordVisibility('newPassword')">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    width="20" height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    stroke-width="2"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    class="lucide lucide-eye"
-                                                    id="newPassword-toggle-icon">
-                                                    <path
-                                                        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                    <circle cx="12" cy="12"
-                                                        r="3" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <p id="newPassword-error"
-                                            class="text-red-500 text-xs mt-1 hidden">
-                                            Password must be at least 8
-                                            characters.</p>
-                                    </div>
-                                    <div class="mb-6">
-                                        <label for="confirmNewPassword"
-                                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-                                            Confirm New Password:
-                                        </label>
-                                        <div class="relative">
-                                            <input type="password"
-                                                id="confirmNewPassword"
-                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white pr-10"
-                                                required>
-                                            <button title="confirmNewPassword"
-                                                type="button"
-                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
-                                                onclick="togglePasswordVisibility('confirmNewPassword')">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    width="20" height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    stroke-width="2"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    class="lucide lucide-eye"
-                                                    id="confirmNewPassword-toggle-icon">
-                                                    <path
-                                                        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                    <circle cx="12" cy="12"
-                                                        r="3" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <p id="confirmNewPassword-error"
-                                            class="text-red-500 text-xs mt-1 hidden">
-                                            Passwords do not match.</p>
-                                    </div>
-                                    <button type="submit" id="save-password-btn"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-md shadow-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled>
-                                        Save Password
-                                    </button>
-                                    <p
-                                        class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                        Note: For this demo, the old password
-                                        check is a mock.
-                                    </p>
-                                </form>
-                            </div>
-
-                            <!-- Profile Picture Section -->
-                            <div
-                                class="p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors duration-300">
-                                <h2
-                                    class="text-2xl font-semibold text-gray-700 dark:text-white mb-4">
-                                    Upload Profile Picture</h2>
-                                <div class="flex flex-col items-center mb-6">
-                                    <img id="profile-pic-preview"
-                                        src="https://placehold.co/150x150/cccccc/333333?text=Profile"
-                                        alt="Profile Preview"
-                                        class="w-32 h-32 rounded-full object-cover border-4 border-blue-400 dark:border-blue-600 shadow-md mb-4">
-                                    <div id="drag-drop-area"
-                                        class="drag-area w-full p-6 cursor-pointer border-dashed border-2 border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-md transition-colors duration-300">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            width="32" height="32"
-                                            viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            class="lucide lucide-upload">
-                                            <path
-                                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                            <polyline points="17 8 12 3 7 8" />
-                                            <line x1="12" x2="12" y1="3"
-                                                y2="15" />
-                                        </svg>
-                                        <p class="mt-2">Drag & Drop your image
-                                            here or <span
-                                                class="text-blue-500 dark:text-blue-400 font-semibold">click
-                                                to upload</span></p>
-                                        <input title="profile-pic-upload"
-                                            type="file" id="profile-pic-upload"
-                                            accept=".jpg, .jpeg, .png"
-                                            class="hidden">
-                                    </div>
-                                    <p id="file-error"
-                                        class="text-red-500 text-xs mt-2 hidden">
-                                        Only .jpg, .jpeg, .png files are
-                                        allowed.</p>
+                                class="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                <div class="w-full overflow-x-auto">
+                                    <table
+                                        class="w-full table-fixed border-collapse">
+                                        <thead
+                                            class="bg-gray-50 dark:bg-gray-700">
+                                            <tr>
+                                                <th scope="col"
+                                                    class="w-[15%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    Phone number
+                                                </th>
+                                                <th scope="col"
+                                                    class="w-[35%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    Company/Name
+                                                </th>
+                                                <th scope="col"
+                                                    class="w-[15%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    Type
+                                                </th>
+                                                <th scope="col"
+                                                    class="w-[20%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    Department
+                                                </th>
+                                                <th scope="col"
+                                                    class="w-[15%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    Action Status
+                                                </th>
+                                                <th scope="col"
+                                                    class="w-[15%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody
+                                            class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                                            id="agents-table-body">
+                                            <!-- Table rows will be dynamically populated here -->
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <button id="save-profile-pic-btn"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-md shadow-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled>
-                                    Save Profile Picture
-                                </button>
+                            </div>
+
+                            <div class="mt-4 flex justify-between items-center">
+                                <div
+                                    class="text-sm text-gray-700 dark:text-gray-300">
+                                    Showing <span class="font-medium"
+                                        id="agents-start">1</span> to <span
+                                        class="font-medium"
+                                        id="agents-end">3</span> of <span
+                                        class="font-medium"
+                                        id="agents-total">12</span> results
+                                </div>
+                                <button id="show-more-agents"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">Show
+                                    More</button>
                             </div>
                         </div>
                     </section>
+
+                    <!-- Actions Section -->
+                    <section id="actions" class="page-content hidden"></section>
                 </main>
             </div>
         </div>
@@ -619,7 +506,59 @@
                 </form>
             </div>
         </div>
-        <script type="module" src="../scripts/EmployeeDashboard.js"></script>
+        <!-- Agent Action Modal -->
+        <div id="agent-action-modal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+            <div class="bg-[rgb(26,32,44)] p-6 rounded shadow-lg relative">
+                <button
+                    onclick="document.getElementById('agent-action-modal').classList.add('hidden')"
+                    class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+                <h2 class="text-white font-bold mb-4">Agent Action</h2>
+                <p class="text-white mb-4">Perform your action for agent <span
+                        id="modal-agent-id"></span></p>
+                <div class="mb-4">
+                    <label
+                        class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Action
+                        Value</label>
+                    <textarea id="agent-action-value" rows="5"
+                        class="w-full resize-y min-h-[120px] p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-800 text-gray-100 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 transition-colors duration-200"
+                        placeholder="Enter action details..."></textarea>
+                </div>
+                <div class="mb-4">
+                    <label
+                        class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Action
+                        Status</label>
+                    <div class="relative">
+                        <select id="agent-action-status"
+                            class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-800 text-gray-100 dark:text-white appearance-none pr-10">
+                            <option value="Open Deal">Open Deal</option>
+                            <option value="In Progress Deal">In Progress Deal
+                            </option>
+                            <option value="Finish Deal">Finish Deal</option>
+                        </select>
+                        <!-- Custom arrow for select -->
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                            <svg class="w-4 h-4" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button"
+                        onclick="document.getElementById('agent-action-modal').classList.add('hidden')"
+                        class="px-5 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-300 dark:text-gray-300 hover:bg-gray-700 dark:hover:bg-gray-700 transition-colors duration-200">Close</button>
+                    <button id="send-agent-action"
+                        class="px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-colors duration-200">Send
+                        Action</button>
+                </div>
+            </div>
+        </div>
+        <script type="module" src="../scripts/Employee.Dashboard.js"
+            defer></script>
     </body>
 
 </html>

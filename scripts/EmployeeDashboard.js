@@ -4,13 +4,11 @@ import { account, databases, Query } from '../scripts/appwrite-config.js';
 let isDarkMode = false;
 let currentUserId = null;
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let agents = [];
-let currentProfilePicFile = null;
-const MOCK_CURRENT_PASSWORD = "password123"; // For demo purposes
-const AGENTS_PER_PAGE = 20; // Number of agents to load per page
+const AGENTS_PER_PAGE = 50; // Changed to 50 lines per batch
 let currentPage = 0;
-let isLoadingMore = false;
-let hasMoreAgents = true;
+let allAgents = []; // Store all agents
+let displayedAgents = []; // Store currently displayed agents
+let selectedAgentId = null;
 
 const signoutBTN = document.querySelector('.signoutBTN');
 
@@ -33,20 +31,9 @@ window.showPage = function (pageId) {
 
     document.getElementById("sidebar").classList.add("-translate-x-full");
     document.getElementById("menu-toggle").innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>';
-};
 
-window.togglePasswordVisibility = function (inputId) {
-    let input = document.getElementById(inputId);
-    let icon = document.getElementById(`${inputId}-toggle-icon`);
-
-    if (input.type === "password") {
-        input.type = "text";
-        icon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
-        icon.setAttribute("data-lucide", "eye-off");
-    } else {
-        input.type = "password";
-        icon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
-        icon.setAttribute("data-lucide", "eye");
+    if (pageId === 'actions') {
+        loadAndRenderActions();
     }
 };
 
@@ -175,24 +162,6 @@ function deleteTask(e) {
     confirm("Are you sure you want to delete this task?") && ((tasks = tasks.filter((t) => t.id !== e)), localStorage.setItem("tasks", JSON.stringify(tasks)), renderTasks(), showToast("Task deleted successfully!", "success"));
 }
 
-// Utility: Generate a random color based on a string (consistent per company)
-function stringToColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const color = `hsl(${hash % 360}, 70%, 70%)`;
-    return color;
-}
-
-// Utility: Get initials from a name
-function getInitials(name) {
-    if (!name) return '?';
-    const parts = name.split(' ');
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
 async function fetchAgentsFromApi(page = 0) {
     try {
         const queries = [];
@@ -239,83 +208,139 @@ async function fetchAllAgents() {
     return allAgents;
 }
 
-async function loadAndRenderAgents(searchQuery = "") {
-    const agentsList = document.getElementById("agents-list");
+async function loadAndRenderAgents(searchQuery = "", searchType = "name") {
+    const agentsList = document.getElementById("agents-table-body");
     const agentsLoading = document.getElementById("agents-loading");
     const agentsError = document.getElementById("agents-error");
     const noAgentsFound = document.getElementById("no-agents-found");
-    const showMoreBtn = document.getElementById("show-more-agents");
-
-    if (currentPage === 0) {
-        agentsList.innerHTML = "";
-    }
 
     agentsError.classList.add("hidden");
     noAgentsFound.classList.add("hidden");
     agentsLoading.classList.remove("hidden");
-    showMoreBtn.classList.add("hidden");
 
+    let totalAgents = 0;
     try {
-        let newAgents = [];
-        let total = 0;
-        if (searchQuery) {
-            // Fetch all agents for search
-            newAgents = await fetchAllAgents();
-            total = newAgents.length;
-            const q = searchQuery.toLowerCase();
-            newAgents = newAgents.filter(agent =>
-                (agent['Company-Name'] && agent['Company-Name'].toLowerCase().includes(q)) ||
-                (agent['Name'] && agent['Name'].toLowerCase().includes(q)) ||
-                (agent['Number'] && agent['Number'].toLowerCase().includes(q)) ||
-                (agent['Field'] && agent['Field'].toLowerCase().includes(q)) ||
-                (agent['Role'] && agent['Role'].toLowerCase().includes(q)) ||
-                (agent['Department'] && agent['Department'].toLowerCase().includes(q))
+        let queries = [];
+        let isSearching = !!searchQuery;
+        if (isSearching) {
+            switch (searchType) {
+                case "name":
+                    queries.push(
+                        Query.or([
+                            Query.equal("Company-Name", searchQuery),
+                            Query.equal("Person-Name", searchQuery),
+                            Query.equal("Official-Name", searchQuery)
+                        ])
+                    );
+                    break;
+                case "phone":
+                    queries.push(Query.equal("Number", searchQuery));
+                    break;
+                case "action_status":
+                    queries.push(Query.equal("Action_Status", searchQuery));
+                    break;
+                case "department":
+                    queries.push(Query.equal("Field", searchQuery));
+                    break;
+                default:
+                    break;
+            }
+            queries.push(Query.limit(AGENTS_PER_PAGE));
+            queries.push(Query.offset(0));
+            queries.push(Query.orderAsc('Company-Name'));
+            const response = await databases.listDocuments(
+                '684619e30005eeecc28a',
+                '684619f700081730cbc4',
+                queries
             );
-            currentPage = 1; // Show all results at once
+            displayedAgents = response.documents;
+            allAgents = response.documents;
+            totalAgents = response.total;
         } else {
+            // If not searching, fetch new batch of agents
             const response = await fetchAgentsFromApi(currentPage);
-            newAgents = response.documents;
-            total = response.total;
+            if (currentPage === 0) {
+                allAgents = response.documents;
+                displayedAgents = response.documents;
+            } else {
+                allAgents = allAgents.concat(response.documents);
+                displayedAgents = allAgents;
+            }
+            currentPage++;
+            totalAgents = response.total;
         }
+
         agentsLoading.classList.add("hidden");
 
-        if (newAgents.length === 0 && currentPage === 0) {
+        if (displayedAgents.length === 0) {
             noAgentsFound.classList.remove("hidden");
             return;
         }
+
+        // Clear existing content
         agentsList.innerHTML = "";
-        newAgents.forEach(agent => {
-            // Prefer Company-Name, fallback to Person-Name
-            const companyName = agent['Company-Name'] || agent['Person-Name'] || 'not found';
-            const number = agent['Number'] || 'not found';
-            const field = agent['Field'] || 'not found';
-            const name = agent['Name'] || companyName || 'not found';
-            const initials = getInitials(companyName);
-            const color = stringToColor(companyName);
-            const role = agent['Role'] || 'not found';
-            const department = agent['Department'] || field;
-            const card = document.createElement("div");
-            card.className = "bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-700 flex flex-col items-center cursor-pointer";
-            card.innerHTML = `
-                <div class="w-24 h-24 rounded-full flex items-center justify-center mb-4" style="background:${color}; border: 4px solid #2563eb;">
-                    <span class="text-3xl font-bold text-black">${initials}</span>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-1 text-center">${companyName}</h3>
-                <p class="text-blue-600 dark:text-blue-400 text-sm font-semibold mb-1 text-center">${number}</p>
-                <p class="text-gray-600 dark:text-gray-300 text-sm text-center">${field}</p>
+
+        // Render all displayed agents
+        displayedAgents.forEach(agent => {
+            const companyName = agent['Company-Name'] || agent['Person-Name'] || agent['Official-Name'] || 'N/A';
+            const number = agent['Number'] || 'N/A';
+            const type = agent['Type'] || 'N/A';
+            const department = agent['Field'] || 'N/A';
+            const isCompany = type.toLowerCase().includes('company') || type.toLowerCase().includes('business');
+            const actionStatus = agent['Action_Status'];
+            const actionStatusHtml = actionStatus
+                ? `<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">${actionStatus}</span>`
+                : `<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">Not Actioned</span>`;
+            const row = document.createElement("tr");
+            row.className = "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200";
+            row.setAttribute('data-agent-id', agent.$id);
+            row.innerHTML = `
+                <td class="w-[15%] px-4 py-3 text-left text-xs text-gray-900 dark:text-gray-300 truncate">${number}</td>
+                <td class="w-[35%] px-4 py-3 text-left text-xs text-gray-900 dark:text-gray-300 truncate">${companyName}</td>
+                <td class="w-[15%] px-4 py-3 text-left text-xs">
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${isCompany
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                    : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'}">
+                        ${type}
+                    </span>
+                </td>
+                <td class="w-[20%] px-4 py-3 text-left text-xs text-gray-900 dark:text-gray-300 truncate">${department}</td>
+                <td class="w-[15%] px-4 py-3 text-left text-xs">${actionStatusHtml}</td>
+                <td class="w-[15%] px-4 py-3 text-left text-xs">
+                    <button class="take-action-btn bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200" data-agent-id="${agent.$id}">
+                        Take Action
+                    </button>
+                </td>
             `;
-            card.addEventListener('click', () => createAgentDetailsPopup(agent));
-            agentsList.appendChild(card);
+            agentsList.appendChild(row);
         });
-        if (!searchQuery) {
-            hasMoreAgents = (currentPage + 1) * AGENTS_PER_PAGE < total;
-            if (hasMoreAgents) {
-                showMoreBtn.classList.remove("hidden");
+
+        // Update the results count
+        document.getElementById("agents-start").textContent = "1";
+        document.getElementById("agents-end").textContent = displayedAgents.length;
+        document.getElementById("agents-total").textContent = totalAgents;
+
+        // Show More button logic
+        const showMoreBtn = document.getElementById('show-more-agents');
+        if (showMoreBtn) {
+            if (displayedAgents.length >= totalAgents) {
+                showMoreBtn.style.display = 'none';
+            } else {
+                showMoreBtn.style.display = '';
             }
-            currentPage++;
-        } else {
-            showMoreBtn.classList.add("hidden");
+            showMoreBtn.onclick = function () {
+                if (isSearching) {
+                    // For search, fetch next page of results
+                    currentPage++;
+                    loadAndRenderAgents(searchQuery, searchType);
+                } else {
+                    loadAndRenderAgents();
+                }
+            };
         }
+
+        setupTakeActionButtonHandler();
     } catch (error) {
         console.error("Error fetching agents:", error);
         agentsLoading.classList.add("hidden");
@@ -324,106 +349,6 @@ async function loadAndRenderAgents(searchQuery = "") {
     }
 }
 
-function createAgentDetailsPopup(agent) {
-    const popup = document.createElement('div');
-    popup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    popup.innerHTML = `
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 transform transition-all">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Agent Details</h3>
-                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Type</label>
-                    <p class="mt-1 text-gray-900 dark:text-white">${agent.Type || 'N/A'}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Company Name</label>
-                    <p class="mt-1 text-gray-900 dark:text-white">${agent['Company-Name'] || 'N/A'}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Number</label>
-                    <p class="mt-1 text-gray-900 dark:text-white">${agent.Number || 'N/A'}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Social Media</label>
-                    <a href="${agent['Social-Media'] || '#'}" target="_blank" class="mt-1 text-blue-600 dark:text-blue-400 hover:underline">
-                        ${agent['Social-Media'] || 'N/A'}
-                    </a>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Field</label>
-                    <p class="mt-1 text-gray-900 dark:text-white">${agent.Field || 'N/A'}</p>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(popup);
-}
-
-function validatePasswordFields() {
-    let e = document.getElementById("oldPassword").value,
-        t = document.getElementById("newPassword").value,
-        s = document.getElementById("confirmNewPassword").value,
-        r = document.getElementById("oldPassword-error"),
-        a = document.getElementById("newPassword-error"),
-        l = document.getElementById("confirmNewPassword-error"),
-        d = document.getElementById("save-password-btn"),
-        n = !0;
-    e !== MOCK_CURRENT_PASSWORD ? (r.classList.remove("hidden"), (n = !1)) : r.classList.add("hidden"),
-        t.length < 8 ? (a.classList.remove("hidden"), (n = !1)) : a.classList.add("hidden"),
-        t !== s ? (l.classList.remove("hidden"), (n = !1)) : l.classList.add("hidden"),
-        (d.disabled = !n);
-}
-function handlePasswordChange(e) {
-    e.preventDefault();
-    let t = document.getElementById("oldPassword").value,
-        s = document.getElementById("newPassword").value;
-    t === MOCK_CURRENT_PASSWORD && s.length >= 8 && s === document.getElementById("confirmNewPassword").value
-        ? (showToast("Password updated successfully!", "success"),
-            (document.getElementById("oldPassword").value = ""),
-            (document.getElementById("newPassword").value = ""),
-            (document.getElementById("confirmNewPassword").value = ""),
-            validatePasswordFields())
-        : showToast("Failed to update password. Please check your inputs.", "error");
-}
-function handleProfilePicSelect(e) {
-    let t = document.getElementById("profile-pic-preview"),
-        s = document.getElementById("file-error"),
-        r = document.getElementById("save-profile-pic-btn");
-    if ((s.classList.add("hidden"), (r.disabled = !0), e)) {
-        let a = e.type;
-        if (["image/jpeg", "image/png"].includes(a)) {
-            let l = new FileReader();
-            (l.onload = (s) => {
-                (t.src = s.target.result), (currentProfilePicFile = e), (r.disabled = !1);
-            }),
-                l.readAsDataURL(e);
-        } else s.classList.remove("hidden"), (t.src = "https://placehold.co/150x150/cccccc/333333?text=Profile"), (currentProfilePicFile = null);
-    } else (t.src = "https://placehold.co/150x150/cccccc/333333?text=Profile"), (currentProfilePicFile = null);
-}
-function handleSaveProfilePic() {
-    if (currentProfilePicFile) {
-        let e = new FileReader();
-        (e.onload = (e) => {
-            localStorage.setItem("userProfilePic", e.target.result), showToast("Profile picture saved!", "success"), (document.getElementById("save-profile-pic-btn").disabled = !0);
-        }),
-            e.readAsDataURL(currentProfilePicFile);
-    } else showToast("No profile picture selected to save.", "error");
-}
-function toggleDarkMode() {
-    (isDarkMode = !isDarkMode), document.documentElement.classList.toggle("dark", isDarkMode), localStorage.setItem("darkMode", isDarkMode);
-    let e = document.querySelector("#dark-mode-toggle svg");
-    isDarkMode
-        ? (e.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>')
-        : (e.innerHTML =
-            '<circle cx="12" cy="12" r="8"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/><line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/><line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/><line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/>');
-}
 async function checkSession() {
     try {
         const session = await account.get();
@@ -433,8 +358,10 @@ async function checkSession() {
         window.location.href = '/Pages/login.html';
     }
 }
+
 // Call checkSession when the script loads
 checkSession();
+
 document.addEventListener("DOMContentLoaded", () => {
     let e = localStorage.getItem("darkMode");
     "true" === e
@@ -453,47 +380,65 @@ document.addEventListener("DOMContentLoaded", () => {
                     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="8"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/><line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/><line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/><line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/></svg>')),
         updateDashboardUserId();
     let t = localStorage.getItem("userProfilePic");
-    t && (document.getElementById("profile-pic-preview").src = t),
-        renderTasks(),
-        loadAndRenderAgents(),
-        document.getElementById("add-task-fab").addEventListener("click", () => openTaskModal()),
-        document.getElementById("task-form").addEventListener("submit", saveTask),
-        document.getElementById("agent-search-input").addEventListener("keyup", (e) => {
-            currentPage = 0;
-            hasMoreAgents = true;
-            loadAndRenderAgents(e.target.value);
-        }),
-        document.getElementById("show-more-agents").addEventListener("click", () => {
-            loadAndRenderAgents(document.getElementById("agent-search-input").value);
-        }),
-        document.getElementById("oldPassword").addEventListener("input", validatePasswordFields),
-        document.getElementById("newPassword").addEventListener("input", validatePasswordFields),
-        document.getElementById("confirmNewPassword").addEventListener("input", validatePasswordFields),
-        document.getElementById("password-change-form").addEventListener("submit", handlePasswordChange);
-    let s = document.getElementById("drag-drop-area"),
-        r = document.getElementById("profile-pic-upload");
-    s.addEventListener("click", () => r.click()),
-        r.addEventListener("change", (e) => handleProfilePicSelect(e.target.files[0])),
-        s.addEventListener("dragover", (e) => {
-            e.preventDefault(), s.classList.add("hover");
-        }),
-        s.addEventListener("dragleave", () => {
-            s.classList.remove("hover");
-        }),
-        s.addEventListener("drop", (e) => {
-            e.preventDefault(), s.classList.remove("hover"), handleProfilePicSelect(e.dataTransfer.files[0]);
-        }),
-        document.getElementById("save-profile-pic-btn").addEventListener("click", handleSaveProfilePic),
-        document.getElementById("dark-mode-toggle").addEventListener("click", toggleDarkMode),
-        document.getElementById("menu-toggle").addEventListener("click", () => {
-            let e = document.getElementById("sidebar");
-            e.classList.toggle("-translate-x-full");
-            let t = document.getElementById("menu-toggle").querySelector("svg");
-            e.classList.contains("-translate-x-full")
-                ? (t.innerHTML = '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>')
-                : (t.innerHTML = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
-        }),
-        showToast("Welcome to your Employee Dashboard!", "info", 4e3);
+    if (document.getElementById("profile-pic-preview") && t) {
+        document.getElementById("profile-pic-preview").src = t;
+    }
+    renderTasks();
+    loadAndRenderAgents();
+    const addTaskFab = document.getElementById("add-task-fab");
+    if (addTaskFab) addTaskFab.addEventListener("click", () => openTaskModal());
+    const taskForm = document.getElementById("task-form");
+    if (taskForm) taskForm.addEventListener("submit", saveTask);
+    const agentSearchInput = document.getElementById("agent-search-input");
+    const agentSearchType = document.getElementById("agent-search-type");
+    if (agentSearchInput && agentSearchType) {
+        agentSearchInput.addEventListener("keyup", (e) => {
+            loadAndRenderAgents(e.target.value, agentSearchType.value);
+        });
+        agentSearchType.addEventListener("change", () => {
+            loadAndRenderAgents(agentSearchInput.value, agentSearchType.value);
+        });
+    }
+    const darkModeToggle = document.getElementById("dark-mode-toggle");
+    if (darkModeToggle) darkModeToggle.addEventListener("click", () => {
+        let e = document.getElementById("sidebar");
+        e.classList.toggle("-translate-x-full");
+        let t = document.getElementById("menu-toggle").querySelector("svg");
+        e.classList.contains("-translate-x-full")
+            ? (t.innerHTML = '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>')
+            : (t.innerHTML = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
+    });
+    showToast("Welcome to your Employee Dashboard!", "info", 4e3);
+    const sendActionBtn = document.getElementById('send-agent-action');
+    if (sendActionBtn) {
+        sendActionBtn.addEventListener('click', async function () {
+            const agentId = selectedAgentId;
+            const actionValue = document.getElementById('agent-action-value').value.trim();
+            const actionStatus = document.getElementById('agent-action-status').value;
+
+            if (!actionValue) {
+                showToast('Action value cannot be empty.', 'error');
+                return;
+            }
+            try {
+                await databases.updateDocument(
+                    '684619e30005eeecc28a', // Database ID
+                    '684619f700081730cbc4', // Collection ID
+                    agentId,
+                    {
+                        IsActiond: true,
+                        Action_Value: actionValue,
+                        Action_Status: actionStatus
+                    }
+                );
+                showToast('Action updated successfully!', 'success');
+                document.getElementById('agent-action-modal').classList.add('hidden');
+                loadAndRenderAgents(); // Refresh the list
+            } catch (error) {
+                showToast('Failed to update action.', 'error');
+            }
+        });
+    }
 });
 
 signoutBTN.addEventListener('click', async function signout() {
@@ -505,3 +450,118 @@ signoutBTN.addEventListener('click', async function signout() {
         showToast("Error signing out. Please try again.", "error");
     }
 });
+
+// --- Actions Section Logic (Rewritten) ---
+async function loadAndRenderActions() {
+    const actionsSection = document.getElementById('actions');
+    if (!actionsSection) return;
+    actionsSection.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md transition-colors duration-300">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">Actions</h1>
+            <div id="actions-summary-cards" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"></div>
+            <div class="overflow-x-auto">
+                <table class="w-full table-fixed border-collapse mt-6">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="w-[30%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Agent Name</th>
+                            <th class="w-[20%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phone Number</th>
+                            <th class="w-[30%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action Value</th>
+                            <th class="w-[20%] px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="actions-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    const actionsTableBody = document.getElementById('actions-table-body');
+    const summaryCards = document.getElementById('actions-summary-cards');
+    actionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-300">Loading...</td></tr>';
+    try {
+        // Query all agents
+        const response = await databases.listDocuments(
+            '684619e30005eeecc28a',
+            '684619f700081730cbc4',
+            [Query.limit(1000)] // adjust as needed for your dataset size
+        );
+        actionsTableBody.innerHTML = '';
+        if (!response.documents.length) {
+            actionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-300">No actions found.</td></tr>';
+            summaryCards.innerHTML = '';
+            return;
+        }
+        // Calculate summary
+        const allAgents = response.documents;
+        const actioned = allAgents.filter(a => a.IsActiond === true).length;
+        const successful = allAgents.filter(a => a.Action_Status === 'Finish Deal').length;
+        const inProgress = allAgents.filter(a => a.Action_Status === 'In Progress Deal').length;
+        const failed = allAgents.filter(a => a.Action_Status === 'Refused Deal').length;
+        summaryCards.innerHTML = `
+            <div class="bg-blue-100 dark:bg-blue-900 p-6 rounded-lg shadow text-center">
+                <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">${actioned}</div>
+                <div class="text-gray-700 dark:text-gray-300 mt-2">Actioned Agents</div>
+            </div>
+            <div class="bg-green-100 dark:bg-green-900 p-6 rounded-lg shadow text-center">
+                <div class="text-2xl font-bold text-green-700 dark:text-green-300">${successful}</div>
+                <div class="text-gray-700 dark:text-gray-300 mt-2">Successful Deals</div>
+            </div>
+            <div class="bg-yellow-100 dark:bg-yellow-900 p-6 rounded-lg shadow text-center">
+                <div class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">${inProgress}</div>
+                <div class="text-gray-700 dark:text-gray-300 mt-2">In Progress Deals</div>
+            </div>
+            <div class="bg-red-100 dark:bg-red-900 p-6 rounded-lg shadow text-center">
+                <div class="text-2xl font-bold text-red-700 dark:text-red-300">${failed}</div>
+                <div class="text-gray-700 dark:text-gray-300 mt-2">Failed Deals</div>
+            </div>
+        `;
+        // Only show actioned agents in the table
+        allAgents.filter(a => a.IsActiond === true).forEach(agent => {
+            const name = agent['Company-Name'] || agent['Person-Name'] || agent['Official-Name'] || 'N/A';
+            const number = agent['Number'] || 'N/A';
+            const value = agent['Action_Value'] || 'N/A';
+            const status = agent['Action_Status'] || 'N/A';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="w-[30%] px-4 py-3 text-xs text-gray-900 dark:text-gray-300 truncate">${name}</td>
+                <td class="w-[20%] px-4 py-3 text-xs text-gray-900 dark:text-gray-300 truncate">${number}</td>
+                <td class="w-[30%] px-4 py-3 text-xs text-gray-900 dark:text-gray-300 truncate">${value}</td>
+                <td class="w-[20%] px-4 py-3 text-xs text-gray-900 dark:text-gray-300 truncate">${status}</td>
+            `;
+            actionsTableBody.appendChild(row);
+        });
+    } catch (err) {
+        actionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Failed to load actions.</td></tr>';
+        summaryCards.innerHTML = '';
+    }
+}
+
+function openAgentActionModal(agentId) {
+    if (!agentId) {
+        showToast('No agent ID provided for action.', 'error');
+        return;
+    }
+    selectedAgentId = agentId;
+    const modal = document.getElementById('agent-action-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        const agentIdSpan = document.getElementById('modal-agent-id');
+        if (agentIdSpan) agentIdSpan.textContent = agentId;
+    } else {
+        showToast('Action modal not found.', 'error');
+    }
+}
+
+function setupTakeActionButtonHandler() {
+    const agentsTableBody = document.getElementById('agents-table-body');
+    if (!agentsTableBody) return;
+    agentsTableBody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.take-action-btn');
+        if (btn) {
+            const agentId = btn.getAttribute('data-agent-id');
+            openAgentActionModal(agentId);
+        }
+    });
+}
+
+window.openTaskModal = openTaskModal;
+window.deleteTask = deleteTask;
