@@ -1,4 +1,4 @@
-import { account, databases, Query } from '../scripts/appwrite-config.js';
+import { account, databases, Query } from './appwrite-config.js';
 
 // Global variables
 let isDarkMode = false;
@@ -562,6 +562,5 @@ function setupTakeActionButtonHandler() {
         }
     });
 }
-
 window.openTaskModal = openTaskModal;
 window.deleteTask = deleteTask;
