@@ -562,5 +562,6 @@ function setupTakeActionButtonHandler() {
         }
     });
 }
+
 window.openTaskModal = openTaskModal;
 window.deleteTask = deleteTask;
