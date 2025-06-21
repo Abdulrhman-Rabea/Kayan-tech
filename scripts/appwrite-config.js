@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@18.1.1/+esm';
+import { Client, Account, Databases, Query } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/+esm';
 
 const client = new Client();
 
